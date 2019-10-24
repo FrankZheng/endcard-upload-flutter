@@ -1,9 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:endcard_upload_flutter/upload_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:html';
-import 'package:http_parser/http_parser.dart';
 import 'package:provider/provider.dart';
 
 class DropZoneBox extends StatefulWidget {
