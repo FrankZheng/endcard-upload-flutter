@@ -8,32 +8,6 @@ import 'package:http_parser/http_parser.dart';
 
 const int DEBUG_PORT = 8091; //for local server
 
-Future<void> doUpload(UploadModel model) {
-  final reader = new FileReader();
-  final file = model.fileToUpload;
-  model.uploading = true;
-  reader.onLoadEnd.listen((_) async {
-    Timer(Duration(microseconds: 100), () async {
-      var data = reader.result;
-      var formData = FormData.fromMap({
-        'bundle': MultipartFile.fromBytes(data,
-            filename: file.name, contentType: MediaType.parse(file.type))
-      });
-      try {
-        var response = await model.dio.post('/upload', data: formData);
-        print(response.runtimeType);
-        print('response:${response.data}');
-        model.uploading = false;
-      } catch (e) {
-        print('Failed to upload file, ${e.toString()}');
-        model.uploading = false;
-      }
-    });
-  });
-  reader.readAsArrayBuffer(model.fileToUpload);
-  return Future.value(null);
-}
-
 class UploadModel with ChangeNotifier {
   File _fileToUpload;
   bool _uploading = false;
@@ -51,8 +25,8 @@ class UploadModel with ChangeNotifier {
 
   UploadModel() {
     dio = new Dio();
-    // dio.options.connectTimeout = 3000;
-    // dio.options.receiveTimeout = 3000;
+    dio.options.connectTimeout = 3000;
+    dio.options.receiveTimeout = 3000;
 
     Location location = document.window.location;
     String baseUrl = kReleaseMode
@@ -66,29 +40,34 @@ class UploadModel with ChangeNotifier {
     //Set the uploading = true;
     //set the uploadResultMessage when upload success or failed
     assert(canUpload);
-    compute(doUpload, this);
 
-    // final reader = new FileReader();
-    // final file = _fileToUpload;
-    // uploading = true;
-    // reader.onLoadEnd.listen((_) async {
-    //   var data = reader.result;
+    final reader = new FileReader();
+    reader.onLoadEnd.listen((_) {
+      //seems the callback has been called in a main(ui) thread, maybe within the browser native thread.
+      //so do anything here will block the UI interaction.
+      //so here we use a timer to do the real uploading.
+      Timer(Duration(milliseconds: 100),
+          () => this._doUpload(_fileToUpload, reader));
+    });
+    uploading = true;
+    reader.readAsArrayBuffer(_fileToUpload);
+  }
 
-    //   var formData = FormData.fromMap({
-    //     'bundle': MultipartFile.fromBytes(data,
-    //         filename: file.name, contentType: MediaType.parse(file.type))
-    //   });
-    //   try {
-    //     var response = await dio.post('/upload', data: formData);
-    //     print(response.runtimeType);
-    //     print('response:${response.data}');
-    //     uploading = false;
-    //   } catch (e) {
-    //     print('Failed to upload file, ${e.toString()}');
-    //     uploading = false;
-    //   }
-    // });
-    // reader.readAsArrayBuffer(_fileToUpload);
+  void _doUpload(File file, FileReader reader) async {
+    var data = reader.result;
+    var formData = FormData.fromMap({
+      'bundle': MultipartFile.fromBytes(data,
+          filename: file.name, contentType: MediaType.parse(file.type))
+    });
+    try {
+      var response = await dio.post('/upload', data: formData);
+      debugPrint(response.data.runtimeType.toString());
+      debugPrint('response:${response.data}');
+      uploading = false;
+    } catch (e) {
+      print('Failed to upload file, ${e.toString()}');
+      uploading = false;
+    }
   }
 
   bool setUploadFile(File file) {
