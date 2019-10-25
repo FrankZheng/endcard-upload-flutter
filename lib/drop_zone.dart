@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:endcard_upload_flutter/upload_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -27,66 +28,27 @@ class _DropZoneBoxState extends State<DropZoneBox> {
 
     _uploadInput.onChange.listen((e) {
       debugPrint('on change');
-      // read file content as dataURL
-      final files = _uploadInput.files;
-      if (files.length == 1) {
-        final file = files[0];
-        //check the file extension, make sure it's a zip
-        //final reader = new FileReader();
-        debugPrint('${file.name}, ${file.type}, ${file.size}');
-        if (!Provider.of<UploadModel>(context).setUploadFile(file)) {
-          //show alert
-        }
-
-        // reader.onLoadEnd.listen((e) {
-        //   debugPrint('onLoadEnd');
-        //   var data = reader.result;
-        //   //debugPrint('${data.runtimeType}');
-        //   //need check the reader.result type
-        //   //if (data is String) {
-        //   _handleResult(file, data);
-        //   //}
-        // });
-        // //reader.readAsDataUrl(file);
-        // reader.readAsArrayBuffer(file);
-      }
+      _onSelectFile(_uploadInput.files);
     });
   }
 
-  // void _handleResult(File file, List<int> data) async {
-  //   debugPrint('handleResult, size:${data.length}');
-
-  //   var formData = FormData.fromMap({
-  //     'bundle': MultipartFile.fromBytes(data,
-  //         filename: file.name, contentType: MediaType.parse(file.type))
-  //   });
-  //   Dio dio = new Dio();
-  //   dio.options.baseUrl = baseUrl;
-  //   var uploadUrl = '/upload';
-  //   print('uploadUrl: $uploadUrl');
-  //   try {
-  //     var response = await dio.post(uploadUrl, data: formData);
-  //     print('response:${response.data}');
-  //   } catch (e) {
-  //     print('Failed to upload file, ${e.toString()}');
-  //   }
-  // }
+  void _onSelectFile(List<File> files) {
+    if (files.length == 1) {
+      final file = files[0];
+      //check the file extension, make sure it's a zip
+      //final reader = new FileReader();
+      debugPrint('${file.name}, ${file.type}, ${file.size}');
+      if (!Provider.of<UploadModel>(context).setUploadFile(file)) {
+        //show alert
+      }
+    }
+  }
 
   @override
   void initState() {
     document.body.onDragOver.listen(_onDragOver);
     document.body.onDrop.listen(_onDrop);
     document.body.onDragLeave.listen(_onDragLeave);
-    // Location location = document.window.location;
-    // if (!kReleaseMode) {
-    //   //for debug mode, we connect to a local mock server
-    //   baseUrl = 'http://${location.hostname}:8091';
-    //   print('base url: $baseUrl');
-    // } else {
-    //   //for release mode, the web files hosted on the same host with the backend api
-    //   baseUrl = 'http://${location.host}';
-    // }
-
     super.initState();
   }
 
@@ -105,15 +67,19 @@ class _DropZoneBoxState extends State<DropZoneBox> {
           this._dropZoneDragOvered = false;
         });
       }
-      e.stopPropagation();
-      e.preventDefault();
     }
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   void _onDrop(MouseEvent e) {
     debugPrint('_onDrop');
     Offset pos = Offset(e.layer.x.toDouble(), e.layer.y.toDouble());
-    _inDropZone(pos);
+    if (_inDropZone(pos)) {
+      debugPrint('drop in');
+      _dropZoneDragOvered = false;
+      _onSelectFile(e.dataTransfer.files);
+    }
     e.stopPropagation();
     e.preventDefault();
   }
@@ -136,8 +102,6 @@ class _DropZoneBoxState extends State<DropZoneBox> {
 
   @override
   Widget build(BuildContext context) {
-    final model = Provider.of<UploadModel>(context);
-
     return Container(
       color: Colors.white,
       child: Container(
@@ -147,29 +111,62 @@ class _DropZoneBoxState extends State<DropZoneBox> {
                 width: 1,
                 color: _dropZoneDragOvered ? Colors.blue : Colors.grey)),
         margin: EdgeInsets.all(20),
-        //color: Color(0xFFF0F2F5),
+        padding: EdgeInsets.all(10),
         child: GestureDetector(
-          onTap: _onTapToUpload,
-          child: Column(
-            key: _dropZoneKey,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                Icons.cloud_upload,
-                size: 40,
-                color: Colors.blue,
-              ),
-              SizedBox(height: 10),
-              Text('Drag a Zip bundle here'),
-              SizedBox(height: 10),
-              Text('or Browser to upload'),
-              if (model.canUpload) Text(model.fileToUpload.name),
-            ],
-          ),
-        ),
+            onTap: _onTapToUpload,
+            child: Stack(
+              //fit: StackFit.expand,
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                _StaticContent(),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    _FileBoxInfo(),
+                  ],
+                )
+              ],
+            )),
       ),
       height: 300,
       width: 640,
     );
+  }
+}
+
+class _StaticContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      Icon(
+        Icons.cloud_upload,
+        size: 40,
+        color: Colors.blue,
+      ),
+      SizedBox(height: 10),
+      Text('Drag a Zip bundle here'),
+      SizedBox(height: 10),
+      Text('or Browser to upload'),
+    ]);
+  }
+}
+
+class _FileBoxInfo extends StatefulWidget {
+  @override
+  __FileBoxInfoState createState() => __FileBoxInfoState();
+}
+
+class __FileBoxInfoState extends State<_FileBoxInfo> {
+  @override
+  Widget build(BuildContext context) {
+    final model = Provider.of<UploadModel>(context);
+    AutoSizeText text = AutoSizeText(
+        model.canUpload ? model.fileToUpload.name : '',
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.clip,
+        style: TextStyle(fontSize: 18, color: Colors.blue));
+
+    return text;
   }
 }

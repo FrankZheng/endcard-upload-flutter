@@ -1,7 +1,11 @@
+import 'dart:html';
+
 import 'package:endcard_upload_flutter/upload_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'drop_zone.dart';
+import 'dart:js' as js;
 
 void main() => runApp(MyApp());
 
@@ -57,6 +61,10 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 20,
             ),
             InfoBox(),
+            SizedBox(
+              height: 20,
+            ),
+            HelpButtonBox(),
           ],
         ),
       )),
@@ -93,11 +101,32 @@ class _UploadButtonState extends State<UploadButton> {
 
   @override
   Widget build(BuildContext context) {
+    //Widget content;
+    // if (Provider.of<UploadModel>(context).uploadState ==
+    //     UploadState.uploading) {
+    //   content = SizedBox(
+    //     child: CircularProgressIndicator(
+    //       backgroundColor: Colors.white,
+    //     ),
+    //     width: 30,
+    //     height: 30,
+    //   );
+    // } else {
+    //   content = Text('Upload');
+    // }
+
     return RaisedButton(
+      color: Colors.blue,
+      textColor: Colors.white,
       child: Container(
         width: 80,
         height: 40,
-        child: Center(child: Text('Upload')),
+        child: Center(
+          child: Text(Provider.of<UploadModel>(context).uploadState ==
+                  UploadState.uploading
+              ? 'Uploading...'
+              : "Upload"),
+        ),
       ),
       onPressed: _onUploadPressed,
     );
@@ -112,8 +141,44 @@ class InfoBox extends StatefulWidget {
 class _InfoBoxState extends State<InfoBox> {
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<UploadModel>(context);
+    if (model.uploadState == UploadState.uploaded ||
+        model.uploadState == UploadState.uploadFailed) {
+      bool failed = model.uploadState == UploadState.uploadFailed;
+      return Container(
+        //color: Colors.yellow,
+        height: 50,
+        child: Text(
+          model.uploadResultMessage,
+          style: TextStyle(
+              color: failed ? Colors.red : Colors.green, fontSize: 18),
+        ),
+      );
+    } else {
+      return Container(
+        height: 50,
+      );
+    }
+  }
+}
+
+class HelpButtonBox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      child: Text('Uploaded Success'),
+      child: GestureDetector(
+        onTap: () {
+          //document.window.location.href = "https://www.google.com";
+          js.context.callMethod("open", [
+            "https://bitbucket.org/vungle_creative_labs/vcl-templates/src/master/"
+          ]);
+        },
+        child: Text('HELP',
+            style: TextStyle(
+              color: Colors.blue,
+              decoration: TextDecoration.underline,
+            )),
+      ),
     );
   }
 }

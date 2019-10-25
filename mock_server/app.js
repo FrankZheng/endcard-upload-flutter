@@ -25,7 +25,7 @@ app.post("/ok", function(req, res) {
 app.post("/upload", function(req, res) {
   console.log(req.files); // the uploaded file object
   res.header("Content-Type", "application/json");
-  res.send('{"code":0, "msg":"OK"}');
+  res.send('{"code":1, "msg":"Invalid Request parameters, please check"}');
 });
 
 app.listen(port, function() {

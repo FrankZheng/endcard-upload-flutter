@@ -8,20 +8,26 @@ import 'package:http_parser/http_parser.dart';
 
 const int DEBUG_PORT = 8091; //for local server
 
+enum UploadState { notReady, uploading, uploaded, uploadFailed }
+
 class UploadModel with ChangeNotifier {
   File _fileToUpload;
-  bool _uploading = false;
-  String uploadResultMessage;
+  UploadState _uploadState = UploadState.notReady;
+  String _uploadResultMessage;
   Dio dio;
 
   bool get canUpload => _fileToUpload != null;
 
   File get fileToUpload => _fileToUpload;
 
-  set uploading(bool value) {
-    _uploading = value;
+  set uploadState(UploadState state) {
+    _uploadState = state;
     notifyListeners();
   }
+
+  UploadState get uploadState => _uploadState;
+
+  String get uploadResultMessage => _uploadResultMessage;
 
   UploadModel() {
     dio = new Dio();
@@ -49,7 +55,7 @@ class UploadModel with ChangeNotifier {
       Timer(Duration(milliseconds: 100),
           () => this._doUpload(_fileToUpload, reader));
     });
-    uploading = true;
+    uploadState = UploadState.uploading;
     reader.readAsArrayBuffer(_fileToUpload);
   }
 
@@ -61,12 +67,21 @@ class UploadModel with ChangeNotifier {
     });
     try {
       var response = await dio.post('/upload', data: formData);
-      debugPrint(response.data.runtimeType.toString());
-      debugPrint('response:${response.data}');
-      uploading = false;
+      //debugPrint(response.data.runtimeType.toString());
+      //debugPrint('response:${response.data}');
+      int code = response.data['code'] ?? -1;
+      _uploadResultMessage = response.data['msg'] ?? 'Unknown Error';
+      //Timer(Duration(milliseconds: 2000), () {
+      if (code == 0) {
+        uploadState = UploadState.uploaded;
+      } else {
+        uploadState = UploadState.uploadFailed;
+      }
+      //});
     } catch (e) {
       print('Failed to upload file, ${e.toString()}');
-      uploading = false;
+      _uploadResultMessage = 'Failed to upload, ${e.toString()}';
+      uploadState = UploadState.uploadFailed;
     }
   }
 
