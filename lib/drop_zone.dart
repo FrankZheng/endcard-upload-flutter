@@ -103,12 +103,13 @@ class _DropZoneBoxState extends State<DropZoneBox> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: _dropZoneKey,
       color: Colors.white,
       child: Container(
         decoration: BoxDecoration(
             color: widget.dropZoneColor,
             border: Border.all(
-                width: 1,
+                width: 2,
                 color: _dropZoneDragOvered ? Colors.blue : Colors.grey)),
         margin: EdgeInsets.all(20),
         padding: EdgeInsets.all(10),

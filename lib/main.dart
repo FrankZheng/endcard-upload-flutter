@@ -13,15 +13,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    String title = 'Vungle Creative QA';
     return MultiProvider(
       providers: [ChangeNotifierProvider(builder: (_) => UploadModel())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: title,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: MyHomePage(title: 'Flutter Demo Home Page'),
+            primarySwatch: Colors.blue,
+            fontFamily: 'vungle',
+            accentColor: Color(0xFF3C2869)),
+        home: MyHomePage(title: title),
       ),
     );
   }
@@ -48,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            TitleBox(),
+            TitleBox(widget.title),
             SizedBox(
               height: 50,
             ),
@@ -75,12 +77,15 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class TitleBox extends StatelessWidget {
+  final String title;
+  TitleBox(this.title);
+
   @override
   Widget build(BuildContext context) {
     //may add a vungle icon later
     //need change font
     return Container(
-      child: Text('Vungle Creative QA Test',
+      child: Text(title,
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
     );
   }
@@ -114,7 +119,8 @@ class _UploadButtonState extends State<UploadButton> {
     // } else {
     //   content = Text('Upload');
     // }
-
+    bool isUploading =
+        Provider.of<UploadModel>(context).uploadState == UploadState.uploading;
     return RaisedButton(
       color: Colors.blue,
       textColor: Colors.white,
@@ -122,10 +128,10 @@ class _UploadButtonState extends State<UploadButton> {
         width: 80,
         height: 40,
         child: Center(
-          child: Text(Provider.of<UploadModel>(context).uploadState ==
-                  UploadState.uploading
-              ? 'Uploading...'
-              : "Upload"),
+          child: Text(
+            isUploading ? 'Uploading...' : "Upload",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
       onPressed: _onUploadPressed,

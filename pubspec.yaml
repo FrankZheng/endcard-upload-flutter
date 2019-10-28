@@ -22,7 +22,7 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  # cupertino_icons: ^0.1.2
   dotted_border: ^1.0.3
   # http: ^0.12.0+2
   dio: ^3.0.3
@@ -42,6 +42,16 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: Vungle
+      fonts:
+        - asset: fonts/PxGrotesk-Regular.ttf
+          style: normal
+        - asset: fonts/PxGrotesk-Light.ttf
+          weight: 100
+        - asset: fonts/PxGrotesk-Bold.ttf
+          weight: 700
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg
