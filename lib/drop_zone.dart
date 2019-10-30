@@ -7,7 +7,8 @@ import 'package:provider/provider.dart';
 
 class DropZoneBox extends StatefulWidget {
   final Color dropZoneColor;
-  DropZoneBox({this.dropZoneColor});
+  final double width;
+  DropZoneBox({this.dropZoneColor, this.width});
 
   @override
   _DropZoneBoxState createState() => _DropZoneBoxState();
@@ -17,7 +18,6 @@ class _DropZoneBoxState extends State<DropZoneBox> {
   final GlobalKey _dropZoneKey = new GlobalKey();
   bool _dropZoneDragOvered = false;
   InputElement _uploadInput;
-  //String baseUrl;
 
   void _onTapToUpload() async {
     debugPrint('onTapToUpload');
@@ -105,32 +105,33 @@ class _DropZoneBoxState extends State<DropZoneBox> {
     return Container(
       key: _dropZoneKey,
       color: Colors.white,
-      child: Container(
-        decoration: BoxDecoration(
-            color: widget.dropZoneColor,
-            border: Border.all(
-                width: 2,
-                color: _dropZoneDragOvered ? Colors.blue : Colors.grey)),
-        margin: EdgeInsets.all(20),
-        padding: EdgeInsets.all(10),
-        child: GestureDetector(
-            onTap: _onTapToUpload,
-            child: Stack(
-              //fit: StackFit.expand,
-              alignment: AlignmentDirectional.center,
-              children: <Widget>[
-                _StaticContent(),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    _FileBoxInfo(),
-                  ],
-                )
-              ],
-            )),
+      child: GestureDetector(
+        onTap: _onTapToUpload,
+        child: Container(
+          decoration: BoxDecoration(
+              color: widget.dropZoneColor,
+              border: Border.all(
+                  width: 2,
+                  color: _dropZoneDragOvered ? Colors.blue : Colors.grey)),
+          margin: EdgeInsets.all(20),
+          padding: EdgeInsets.all(10),
+          child: Stack(
+            //fit: StackFit.expand,
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              _StaticContent(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  _FileBoxInfo(),
+                ],
+              )
+            ],
+          ),
+        ),
       ),
       height: 300,
-      width: 640,
+      width: widget.width,
     );
   }
 }

@@ -54,7 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 50,
             ),
-            DropZoneBox(dropZoneColor: Color(0xFFF0F2F5)),
+            DropZoneBox(
+              dropZoneColor: Color(0xFFF0F2F5),
+              width: 640,
+            ),
             SizedBox(
               height: 20,
             ),
@@ -62,7 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 20,
             ),
-            InfoBox(),
+            InfoBox(
+              width: 640,
+            ),
             SizedBox(
               height: 20,
             ),
@@ -140,6 +145,8 @@ class _UploadButtonState extends State<UploadButton> {
 }
 
 class InfoBox extends StatefulWidget {
+  final double width;
+  InfoBox({this.width});
   @override
   _InfoBoxState createState() => _InfoBoxState();
 }
@@ -152,8 +159,16 @@ class _InfoBoxState extends State<InfoBox> {
         model.uploadState == UploadState.uploadFailed) {
       bool failed = model.uploadState == UploadState.uploadFailed;
       return Container(
-        //color: Colors.yellow,
+        decoration: BoxDecoration(
+            color: failed ? Color(0xFFFFF1F0) : Color(0xFFA3A0),
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            border: Border.all(
+              width: 1,
+              color: Color(0xFFFDA3A0),
+            )),
         height: 50,
+        width: widget.width,
+        alignment: Alignment.center,
         child: Text(
           model.uploadResultMessage,
           style: TextStyle(
